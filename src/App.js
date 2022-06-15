@@ -1,5 +1,5 @@
 // Imports
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import MoviesList from "./components/MoviesList";
 import './App.css';
 
@@ -12,7 +12,9 @@ const App = () => {
 	const [isError, setIsError] = useState(null);
 
 	// Get data
-	const fetchMovies = async() => {
+	// We use useCallback for prevent infinite loop in useEffect
+	// useCallback for not re-create function unnecessarily
+	const fetchMovies = useCallback(async() => {
 		setIsLoading(true);
 		setIsError(null);
 		try {
@@ -28,7 +30,7 @@ const App = () => {
 					id:movieData.episode_id,
 					title:movieData.title,
 					openingText:movieData.opening_crawl,
-					releaseDate:movieData.relase_date
+					releaseDate:movieData.release_date
 				};
 			});
 			setMovies(transformedMovies);
@@ -37,7 +39,13 @@ const App = () => {
 			setIsLoading(false);
 			setIsError(error.message);
 		}
-	};
+		// No dependencies to declare to useCallback here
+	},[]);
+
+	// Load data on mount
+	useEffect(() => {
+		fetchMovies();
+	},[fetchMovies]);
 
 	// Managing content
 	// Another approach than multiples returns in MoviesList
